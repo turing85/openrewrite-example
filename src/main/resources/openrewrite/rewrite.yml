@@ -7,3 +7,46 @@ recipeList:
       replace: ${classdef} implements Foo {
       regex: true
       filePattern: src/main/java/**/*.java
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: de.turing85.AddBaseTest
+displayName: Add BaseTest.java
+recipeList:
+  - org.openrewrite.text.CreateTextFile:
+      fileContents: |
+        package de.turing85.openrewrite.example;
+        
+        abstract class BaseTest {
+          protected void run(Runnable runnable) {
+            runnable.run();
+          }
+        }
+      relativeFileName: src/test/java/de/turing85/openrewrite/example/BaseTest.java
+      overwriteExisting: false
+  - org.openrewrite.text.FindAndReplace:
+      find: class (?<className>(?!BaseTest)[^\ ]*) (?!extends BaseTest\ )\{
+      replace: class ${className} extends BaseTest \{
+      regex: true
+      filePattern: src/test/java/**/*.java
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: de.turing85.WrapTestWithRun
+displayName: Wrap test method bodies with run method
+recipeList:
+  - org.openrewrite.text.FindAndReplace:
+      find: |
+        ^  @Test$
+        ^  (?<methodSignature>.*?) (?<throwList>throws .*?)?\{$
+        ^    (?<methodBody>(?!run\()(?!\ ).*?)$
+        ^  \}$
+      replace: |
+        @Test
+        ${methodSignature} {
+          run(() -> {
+            ${methodBody}
+          });
+        }
+      regex: true
+      multiline: true
+      dotAll: true
+      filePattern: src/test/java/**/*.java

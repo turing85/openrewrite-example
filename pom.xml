@@ -12,7 +12,7 @@
         <!-- Plugin versions -->
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
-        <rewrite-maven-plugin.version>5.4.2</rewrite-maven-plugin.version>
+        <rewrite-maven-plugin.version>5.5.0</rewrite-maven-plugin.version>
 
         <!-- Dependency versions -->
         <junit-jupiter.version>5.9.1</junit-jupiter.version>
@@ -30,6 +30,55 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>${rewrite-maven-plugin.version}</version>
+                <configuration>
+                    <configLocation>${project.basedir}/src/main/resources/openrewrite/rewrite.yml</configLocation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>add-foo-interface</id>
+                        <goals>
+                            <goal>runNoFork</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <activeRecipes>
+                                <recipe>de.turing85.AddFooInterfaceToBarClass</recipe>
+                            </activeRecipes>
+                            <skipMavenParsing>true</skipMavenParsing>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>add-base-test-class</id>
+                        <goals>
+                            <goal>runNoFork</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <activeRecipes>
+                                <recipe>de.turing85.AddBaseTest</recipe>
+                            </activeRecipes>
+                            <skipMavenParsing>true</skipMavenParsing>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>wrap-test-bodies-in-run</id>
+                        <goals>
+                            <goal>runNoFork</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <activeRecipes>
+                                <recipe>de.turing85.WrapTestWithRun</recipe>
+                            </activeRecipes>
+                            <skipMavenParsing>true</skipMavenParsing>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
                 <artifactId>formatter-maven-plugin</artifactId>
@@ -64,25 +113,6 @@
                     <execution>
                         <goals>
                             <goal>${impsort-maven-plugin.goal}</goal>
-                        </goals>
-                        <phase>validate</phase>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.openrewrite.maven</groupId>
-                <artifactId>rewrite-maven-plugin</artifactId>
-                <version>${rewrite-maven-plugin.version}</version>
-                <configuration>
-                    <activeRecipes>
-                        <recipe>de.turing85.AddFooInterfaceToBarClass</recipe>
-                    </activeRecipes>
-                    <configLocation>${project.basedir}/src/main/resources/openrewrite/rewrite.yml</configLocation>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>runNoFork</goal>
                         </goals>
                         <phase>validate</phase>
                     </execution>
