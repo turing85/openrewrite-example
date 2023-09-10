@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.turing85</groupId>
+    <artifactId>openrewrite-example</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <!-- Plugin versions -->
+        <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
+        <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
+        <rewrite-maven-plugin.version>5.4.2</rewrite-maven-plugin.version>
+
+        <!-- Dependency versions -->
+        <junit-jupiter.version>5.9.1</junit-jupiter.version>
+        <truth.version>1.1.5</truth.version>
+
+        <!-- Project setup -->
+        <formatter-maven-plugin.goal>format</formatter-maven-plugin.goal>
+        <formatter-maven-plugin.skip>false</formatter-maven-plugin.skip>
+        <impsort-maven-plugin.goal>sort</impsort-maven-plugin.goal>
+        <impsort-maven-plugin.skip>false</impsort-maven-plugin.skip>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.revelc.code.formatter</groupId>
+                <artifactId>formatter-maven-plugin</artifactId>
+                <version>${formatter-maven-plugin.version}</version>
+                <configuration>
+                    <configFile>google-style.xml</configFile>
+                    <lineEnding>LF</lineEnding>
+                    <skip>${formatter-maven-plugin.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>${formatter-maven-plugin.goal}</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.revelc.code</groupId>
+                <artifactId>impsort-maven-plugin</artifactId>
+                <version>${impsort-maven-plugin.version}</version>
+                <configuration>
+                    <groups>java.,javax.,jakarta.,*</groups>
+                    <lineEnding>LF</lineEnding>
+                    <removeUnused>true</removeUnused>
+                    <skip>${impsort-maven-plugin.skip}</skip>
+                    <staticAfter>true</staticAfter>
+                    <staticGroups>java,javax.,jakarta.,*</staticGroups>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>${impsort-maven-plugin.goal}</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>${rewrite-maven-plugin.version}</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>de.turing85.AddFooInterfaceToBarClass</recipe>
+                    </activeRecipes>
+                    <configLocation>${project.basedir}/src/main/resources/openrewrite/rewrite.yml</configLocation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>runNoFork</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.truth</groupId>
+            <artifactId>truth</artifactId>
+            <version>${truth.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>skipFormat</id>
+            <activation>
+                <property>
+                    <name>skipFormat</name>
+                </property>
+            </activation>
+            <properties>
+                <formatter-maven-plugin.skip>true</formatter-maven-plugin.skip>
+                <impsort-maven-plugin.skip>true</impsort-maven-plugin.skip>
+            </properties>
+        </profile>
+    </profiles>
+</project>

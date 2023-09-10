@@ -1,0 +1,117 @@
+= OpenRewrite Example
+
+== About
+
+This project demonstrates how to use OpenRewrite in combination with maven.
+
+== Configuration
+
+OpenRecipe is configured in link:src/main/resources/openrewrite/rewrite.yml[] as:
+
+.OpenRewrite definition
+[source,yaml]
+----
+type: specs.openrewrite.org/v1beta/recipe
+name: de.turing85.AddFooInterfaceToBarClass
+displayName: Add the Foo interface to the Bar class.
+recipeList:
+  - org.openrewrite.text.FindAndReplace:
+      find: (?<classdef>class\s+Bar)\s+\{
+      replace: ${classdef} implements Foo {
+      regex: true
+      filePattern: src/main/java/**/*.java
+----
+
+Maven is then configured to include this OpenRewrite configuration:
+
+.Maven configuration in `pom.xml`
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>de.turing85</groupId>
+    <artifactId>openrewrite-example</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    ...
+
+    <build>
+        <plugins>
+            ...
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>${rewrite-maven-plugin.version}</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>de.turing85.AddFooInterfaceToBarClass</recipe>
+                    </activeRecipes>
+                    <configLocation>${project.basedir}/src/main/resources/openrewrite/rewrite.yml</configLocation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>runNoFork</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+   ...
+</project>
+----
+
+== Applying the change
+We can dry-run the change by running
+
+.Dry-running the chagen
+[source,bash]
+----
+$ ./mvnw rewrite:dryRun
+----
+
+This will generate a file `rewrite.patch` in `target/rewrite`
+
+To actually apply the change, we can run
+
+.Applying the change
+[source,bash]
+----
+$ ./mvn rewrite:run
+----
+
+The process is also incorporated into the build process, in the `validate` phase. Thus, we can simply package the application, and the rewrite will be applied:
+
+.Package application
+[source,bash]
+----
+$ ./mvnw package
+----
+
+== Contributors ✨
+
+Thanks goes to these wonderful people (https://allcontributors.org/docs/en/emoji-key[emoji key]):
+
+++++
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://turing85.github.io"><img src="https://avatars.githubusercontent.com/u/32584495?v=4?s=100" width="100px;" alt="Marco Bungart"/><br /><sub><b>Marco Bungart</b></sub></a><br /><a href="#code-turing85" title="Code">💻</a> <a href="#maintenance-turing85" title="Maintenance">🚧</a> <a href="#doc-turing85" title="Documentation">📖</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+++++

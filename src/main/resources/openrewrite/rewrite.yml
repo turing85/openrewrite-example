@@ -1,0 +1,9 @@
+type: specs.openrewrite.org/v1beta/recipe
+name: de.turing85.AddFooInterfaceToBarClass
+displayName: Add the Foo interface to the Bar class.
+recipeList:
+  - org.openrewrite.text.FindAndReplace:
+      find: (?<classdef>class\s+Bar)\s+\{
+      replace: ${classdef} implements Foo {
+      regex: true
+      filePattern: src/main/java/**/*.java
